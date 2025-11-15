@@ -1,0 +1,52 @@
+#Regras e informações do projeto
+
+#Informações
+- O nome do projeto é Financeo, é um sistema de gerenciamento de entradas e gastos para mobile
+
+#Cores
+- Cor principal = #08BF62
+
+#Design
+-
+
+#Tema
+- Dark Mode (padrão) - Ativo
+- Light Mode (disponível)
+
+#Responsividade
+- Sempre deixe o frontend responsivo
+- O sistema é para mobile
+
+#Logo
+- Logo customizada: Container verde (#08BF62) com texto "FA" branco
+- Tamanho padrão: 120x120 (login), 100x100 (signup)
+- Border radius: 24px (login), 20px (signup)
+
+#Nomenclatura
+- Use UpperCamelCase (PascalCase) para:
+  - Arquivo de Páginas (com "Page" no final)
+  - Componentes
+  - Interfaces/Types
+  - Pastas de módulos
+
+- Use lowerCamelCase para:
+  - Variáveis
+  - Funções
+  - Parâmetros
+  - Props de componentes
+  - Estados (pageState, appState)
+  - Campos de objetos
+
+- Use lowercase_with_underscores (snake_case) apenas para:
+  - Campos de banco de dados (quando necessário)
+  - Variáveis de ambiente
+
+- Use lowercase ou kebab-case para:
+ - Rota de páginas
+
+- Sempre crie os nomes em ingles
+
+#Estrutura de pastas e arquivos para modulos
+- Crie uma pasta com nome do modulo
+- Crie uma pasta para páginas do modulo com o nome Pages"Nome do modulo"
+- Crie uma pasta para componentes do modulo com o nome Components"Nome do modulo"
