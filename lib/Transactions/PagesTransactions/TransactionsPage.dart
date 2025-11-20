@@ -328,77 +328,99 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: _isSearchVisible
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: _toggleSearch,
-                tooltip: 'Fechar busca',
-              )
-            : null,
-        title: _isSearchVisible
-            ? ValueListenableBuilder<TextEditingValue>(
-                valueListenable: _searchController,
-                builder: (context, value, child) {
-                  return TextField(
-                    controller: _searchController,
-                    autofocus: true,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Buscar transações...',
-                      hintStyle: TextStyle(color: Colors.grey[600]),
-                      border: InputBorder.none,
-                      suffixIcon: value.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                _debounceTimer?.cancel();
-                                _searchController.clear();
-                                _toggleSearch();
-                              },
-                            )
-                          : null,
-                    ),
-                  );
-                },
-              )
-            : const Text('Transações'),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-        actions: _isSearchVisible
-            ? []
-            : [
-                IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: _toggleSearch,
-                  tooltip: 'Buscar',
+    return SafeArea(
+      child: Column(
+        children: [
+          // Header customizado
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.grey[800]!,
+                  width: 1,
                 ),
-                IconButton(
-                  icon: Stack(
-                    children: [
-                      const Icon(Icons.filter_list),
-                      if (_hasActiveFilters())
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          child: Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF08BF62),
-                              shape: BoxShape.circle,
-                            ),
+              ),
+            ),
+            child: Row(
+              children: [
+                if (_isSearchVisible)
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: _toggleSearch,
+                    tooltip: 'Fechar busca',
+                  ),
+                Expanded(
+                  child: _isSearchVisible
+                      ? ValueListenableBuilder<TextEditingValue>(
+                          valueListenable: _searchController,
+                          builder: (context, value, child) {
+                            return TextField(
+                              controller: _searchController,
+                              autofocus: true,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                hintText: 'Buscar transações...',
+                                hintStyle: TextStyle(color: Colors.grey[600]),
+                                border: InputBorder.none,
+                                suffixIcon: value.text.isNotEmpty
+                                    ? IconButton(
+                                        icon: const Icon(Icons.clear),
+                                        onPressed: () {
+                                          _debounceTimer?.cancel();
+                                          _searchController.clear();
+                                          _toggleSearch();
+                                        },
+                                      )
+                                    : null,
+                              ),
+                            );
+                          },
+                        )
+                      : const Text(
+                          'Transações',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                    ],
-                  ),
-                  onPressed: _showFilterBottomSheet,
-                  tooltip: 'Filtros',
                 ),
+                if (!_isSearchVisible) ...[
+                  IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: _toggleSearch,
+                    tooltip: 'Buscar',
+                  ),
+                  IconButton(
+                    icon: Stack(
+                      children: [
+                        const Icon(Icons.filter_list),
+                        if (_hasActiveFilters())
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF08BF62),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    onPressed: _showFilterBottomSheet,
+                    tooltip: 'Filtros',
+                  ),
+                ],
               ],
-      ),
-      body: _isLoading
+            ),
+          ),
+          // Conteúdo
+          Expanded(
+            child: _isLoading
           ? const Center(
               child: CircularProgressIndicator(
                 color: Color(0xFF08BF62),
@@ -470,6 +492,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     ],
                   ),
                 ),
+          ),
+        ],
+      ),
     );
   }
 

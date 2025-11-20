@@ -56,18 +56,41 @@ class ProfilePage extends StatelessWidget {
     final fullName = user?.userMetadata?['full_name'] ?? 'Usuário';
     final userId = user?.id ?? 'N/A';
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Perfil'),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+    return SafeArea(
+      child: Column(
+        children: [
+          // Header customizado
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.grey[800]!,
+                  width: 1,
+                ),
+              ),
+            ),
+            child: const Row(
+              children: [
+                Text(
+                  'Perfil',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Conteúdo
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
               // Card de informações do usuário
               Card(
                 child: Padding(
@@ -185,6 +208,9 @@ class ProfilePage extends StatelessWidget {
             ],
           ),
         ),
+      ),
+          ),
+        ],
       ),
     );
   }

@@ -1,0 +1,15 @@
+# Exemplo de arquivo key.properties
+# Copie este arquivo para key.properties e preencha com suas informações reais
+# NUNCA commite o arquivo key.properties no Git!
+
+storePassword=sua_senha_do_keystore
+keyPassword=sua_senha_da_chave
+keyAlias=upload
+storeFile=C:\\Users\\SeuUsuario\\upload-keystore.jks
+
+# Instruções:
+# 1. Copie este arquivo: cp key.properties.example key.properties
+# 2. Preencha com as informações da sua keystore
+# 3. Ajuste o caminho do storeFile para o local da sua keystore
+# 4. Use barras invertidas duplas (\\\\) no caminho do Windows
+

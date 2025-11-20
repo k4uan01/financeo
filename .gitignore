@@ -46,3 +46,8 @@ app.*.map.json
 android/build/
 android/android/
 *.iml
+
+# Android keystore files (contém informações sensíveis)
+android/key.properties
+*.jks
+*.keystore

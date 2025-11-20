@@ -264,215 +264,213 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            const AppHeader(),
-            
-            // Tabs DESPESAS/RENDA
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedType = 'expense';
-                      });
-                      _loadMetrics();
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: _selectedType == 'expense'
-                                ? const Color(0xFF08BF62)
-                                : Colors.transparent,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      child: Text(
-                        'DESPESAS',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+    return SafeArea(
+      child: Column(
+        children: [
+          // Header
+          const AppHeader(),
+          
+          // Tabs DESPESAS/RENDA
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedType = 'expense';
+                    });
+                    _loadMetrics();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
                           color: _selectedType == 'expense'
                               ? const Color(0xFF08BF62)
-                              : Colors.grey,
+                              : Colors.transparent,
+                          width: 2,
                         ),
+                      ),
+                    ),
+                    child: Text(
+                      'DESPESAS',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: _selectedType == 'expense'
+                            ? const Color(0xFF08BF62)
+                            : Colors.grey,
                       ),
                     ),
                   ),
                 ),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedType = 'income';
-                      });
-                      _loadMetrics();
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: _selectedType == 'income'
-                                ? const Color(0xFF08BF62)
-                                : Colors.transparent,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      child: Text(
-                        'RENDA',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedType = 'income';
+                    });
+                    _loadMetrics();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
                           color: _selectedType == 'income'
                               ? const Color(0xFF08BF62)
-                              : Colors.grey,
+                              : Colors.transparent,
+                          width: 2,
                         ),
+                      ),
+                    ),
+                    child: Text(
+                      'RENDA',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: _selectedType == 'income'
+                            ? const Color(0xFF08BF62)
+                            : Colors.grey,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          
+          // Navegação de período
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios, size: 18),
+                      onPressed: _selectedPeriod == 'custom' ? null : () => _navigatePeriod(true),
+                      color: Colors.grey,
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildPeriodButton('Dia', 'day'),
+                            const SizedBox(width: 8),
+                            _buildPeriodButton('Semana', 'week'),
+                            const SizedBox(width: 8),
+                            _buildPeriodButton('Mês', 'month'),
+                            const SizedBox(width: 8),
+                            _buildPeriodButton('Ano', 'year'),
+                            const SizedBox(width: 8),
+                            _buildPeriodButton('Personalizado', 'custom'),
+                          ],
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_forward_ios, size: 18),
+                      onPressed: _selectedPeriod == 'custom' ? null : () => _navigatePeriod(false),
+                      color: Colors.grey,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 48),
+                    child: Text(
+                      _formatDateRange(),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[400],
+                        decoration: TextDecoration.underline,
                       ),
                     ),
                   ),
                 ),
               ],
             ),
-            
-            // Navegação de período
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios, size: 18),
-                        onPressed: _selectedPeriod == 'custom' ? null : () => _navigatePeriod(true),
-                        color: Colors.grey,
-                      ),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              _buildPeriodButton('Dia', 'day'),
-                              const SizedBox(width: 8),
-                              _buildPeriodButton('Semana', 'week'),
-                              const SizedBox(width: 8),
-                              _buildPeriodButton('Mês', 'month'),
-                              const SizedBox(width: 8),
-                              _buildPeriodButton('Ano', 'year'),
-                              const SizedBox(width: 8),
-                              _buildPeriodButton('Personalizado', 'custom'),
-                            ],
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.arrow_forward_ios, size: 18),
-                        onPressed: _selectedPeriod == 'custom' ? null : () => _navigatePeriod(false),
-                        color: Colors.grey,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 48),
-                      child: Text(
-                        _formatDateRange(),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[400],
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            // Conteúdo principal
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator(
-                      color: Color(0xFF08BF62),
-                    ))
-                  : _errorMessage != null
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.error_outline,
-                                  size: 48, color: Colors.grey[600]),
-                              const SizedBox(height: 16),
-                              Text(
-                                _errorMessage!,
-                                style: TextStyle(color: Colors.grey[600]),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: _loadMetrics,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF08BF62),
-                                ),
-                                child: const Text('Tentar novamente'),
-                              ),
-                            ],
-                          ),
-                        )
-                      : _metricData == null || _metricData!.categories.isEmpty
-                          ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.pie_chart_outline,
-                                      size: 64, color: Colors.grey[600]),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'Nenhum dado encontrado para este período',
-                                    style: TextStyle(color: Colors.grey[600]),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                            )
-                          : SingleChildScrollView(
-                              child: Column(
-                                children: [
-                                  const SizedBox(height: 16),
-                                  // Gráfico Donut
-                                  _buildDonutChartWithCenter(),
-                                  const SizedBox(height: 24),
-                                  // Lista de categorias
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                    ),
-                                    child: Column(
-                                      children: _metricData!.categories
-                                          .map((category) =>
-                                              _buildCategoryItem(category))
-                                          .toList(),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 80), // Espaço para o botão flutuante
-                                ],
-                              ),
+          ),
+          
+          // Conteúdo principal
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator(
+                    color: Color(0xFF08BF62),
+                  ))
+                : _errorMessage != null
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.error_outline,
+                                size: 48, color: Colors.grey[600]),
+                            const SizedBox(height: 16),
+                            Text(
+                              _errorMessage!,
+                              style: TextStyle(color: Colors.grey[600]),
+                              textAlign: TextAlign.center,
                             ),
-            ),
-          ],
-        ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: _loadMetrics,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF08BF62),
+                              ),
+                              child: const Text('Tentar novamente'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : _metricData == null || _metricData!.categories.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.pie_chart_outline,
+                                    size: 64, color: Colors.grey[600]),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Nenhum dado encontrado para este período',
+                                  style: TextStyle(color: Colors.grey[600]),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          )
+                        : SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                const SizedBox(height: 16),
+                                // Gráfico Donut
+                                _buildDonutChartWithCenter(),
+                                const SizedBox(height: 24),
+                                // Lista de categorias
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
+                                  child: Column(
+                                    children: _metricData!.categories
+                                        .map((category) =>
+                                            _buildCategoryItem(category))
+                                        .toList(),
+                                  ),
+                                ),
+                                const SizedBox(height: 80), // Espaço para o navbar
+                              ],
+                            ),
+                          ),
+          ),
+        ],
       ),
     );
   }
