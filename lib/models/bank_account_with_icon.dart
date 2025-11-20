@@ -6,7 +6,7 @@ class BankAccountWithIcon {
   final String id;
   final String name;
   final double balance;
-  final IconData icon;
+  final BankAccountIconData icon;
   final String? iconColor;
 
   BankAccountWithIcon({
@@ -22,7 +22,7 @@ class BankAccountWithIcon {
       id: json['id'] as String,
       name: json['name'] as String,
       balance: (json['balance'] as num).toDouble(),
-      icon: IconData.fromJson(json['icon'] as Map<String, dynamic>),
+      icon: BankAccountIconData.fromJson(json['icon'] as Map<String, dynamic>),
       iconColor: json['icon_color'] as String?,
     );
   }
@@ -44,15 +44,15 @@ class BankAccountWithIcon {
 }
 
 /// Dados do ícone retornados pela API
-class IconData {
+class BankAccountIconData {
   final String id;
   final String image;
   final String type;
 
-  IconData({required this.id, required this.image, required this.type});
+  BankAccountIconData({required this.id, required this.image, required this.type});
 
-  factory IconData.fromJson(Map<String, dynamic> json) {
-    return IconData(
+  factory BankAccountIconData.fromJson(Map<String, dynamic> json) {
+    return BankAccountIconData(
       id: json['id'] as String,
       image: json['image'] as String,
       type: json['type'] as String,
@@ -68,6 +68,6 @@ class IconData {
 
   @override
   String toString() {
-    return 'IconData(id: $id, image: $image, type: $type)';
+    return 'BankAccountIconData(id: $id, image: $image, type: $type)';
   }
 }

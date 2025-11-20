@@ -17,12 +17,14 @@ class CategoryWithIcon {
 
   factory CategoryWithIcon.fromJson(Map<String, dynamic> json) {
     return CategoryWithIcon(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      type: json['type'] as String,
-      iconColor: json['icon_color'] as String,
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      type: json['type'] as String? ?? '',
+      iconColor: json['icon_color'] as String? ?? '#08BF62',
       isStandard: json['is_standard'] as bool? ?? false,
-      icon: CategoryIconData.fromJson(json['icon'] as Map<String, dynamic>),
+      icon: json['icon'] != null
+          ? CategoryIconData.fromJson(json['icon'] as Map<String, dynamic>)
+          : CategoryIconData(id: '', svg: ''),
     );
   }
 }
@@ -38,8 +40,8 @@ class CategoryIconData {
 
   factory CategoryIconData.fromJson(Map<String, dynamic> json) {
     return CategoryIconData(
-      id: json['id'] as String,
-      svg: json['svg'] as String,
+      id: json['id'] as String? ?? '',
+      svg: json['svg'] as String? ?? '',
     );
   }
 }

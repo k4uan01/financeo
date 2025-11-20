@@ -6,18 +6,24 @@ import 'package:intl/intl.dart';
 import '../../Auth/ComponentsAuth/PrimaryButton.dart';
 import '../../models/category_with_icon.dart';
 import '../../models/bank_account_with_icon.dart' as bank_account_models;
+import '../../models/transaction_detail.dart';
 import '../../services/transaction_service.dart';
 import '../../services/category_service.dart';
 import '../../services/bank_account_service.dart';
 
-class CreateTransactionPage extends StatefulWidget {
-  const CreateTransactionPage({super.key});
+class EditTransactionPage extends StatefulWidget {
+  final String transactionId;
+
+  const EditTransactionPage({
+    super.key,
+    required this.transactionId,
+  });
 
   @override
-  State<CreateTransactionPage> createState() => _CreateTransactionPageState();
+  State<EditTransactionPage> createState() => _EditTransactionPageState();
 }
 
-class _CreateTransactionPageState extends State<CreateTransactionPage> {
+class _EditTransactionPageState extends State<EditTransactionPage> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
   
@@ -29,6 +35,7 @@ class _CreateTransactionPageState extends State<CreateTransactionPage> {
   final BankAccountService _bankAccountService = BankAccountService();
 
   bool _isLoading = false;
+  bool _isLoadingTransaction = true;
   bool _isLoadingCategories = false;
   bool _isLoadingAccounts = false;
 
@@ -40,11 +47,12 @@ class _CreateTransactionPageState extends State<CreateTransactionPage> {
 
   List<CategoryWithIcon> _categories = [];
   List<bank_account_models.BankAccountWithIcon> _bankAccounts = [];
+  TransactionDetail? _transaction;
 
   @override
   void initState() {
     super.initState();
-    _loadCategories();
+    _loadTransaction();
     _loadBankAccounts();
   }
 
@@ -52,6 +60,85 @@ class _CreateTransactionPageState extends State<CreateTransactionPage> {
   void dispose() {
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadTransaction() async {
+    setState(() {
+      _isLoadingTransaction = true;
+    });
+
+    try {
+      final response = await _transactionService.getTransaction(
+        transactionId: widget.transactionId,
+      );
+
+      if (mounted) {
+        if (response.status && response.data != null) {
+          _transaction = response.data!;
+          
+          // Preencher campos com dados da transação
+          _valueDigits = (_transaction!.value * 100).toInt().toString();
+          _descriptionController.text = _transaction!.description;
+          _transactionType = _transaction!.isRevenue ? 'income' : 'expense';
+          _selectedDate = _transaction!.date;
+          
+          // Determinar tipo de seleção de data
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+          final yesterday = today.subtract(const Duration(days: 1));
+          final transactionDate = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+          
+          if (transactionDate == today) {
+            _dateSelectionType = 'today';
+          } else if (transactionDate == yesterday) {
+            _dateSelectionType = 'yesterday';
+          } else {
+            _dateSelectionType = 'custom';
+          }
+
+          // Carregar categorias do tipo correto
+          await _loadCategories();
+          
+          // Encontrar e selecionar a categoria atual
+          if (_categories.isNotEmpty) {
+            try {
+              _selectedCategory = _categories.firstWhere(
+                (cat) => cat.id == _transaction!.category.id,
+              );
+            } catch (e) {
+              _selectedCategory = _categories.first;
+            }
+          }
+
+          // Encontrar e selecionar a conta bancária atual
+          if (_bankAccounts.isNotEmpty) {
+            try {
+              _selectedBankAccount = _bankAccounts.firstWhere(
+                (acc) => acc.id == _transaction!.bankAccount.id,
+              );
+            } catch (e) {
+              _selectedBankAccount = _bankAccounts.first;
+            }
+          }
+
+          setState(() {
+            _isLoadingTransaction = false;
+          });
+        } else {
+          setState(() {
+            _isLoadingTransaction = false;
+          });
+          _showErrorSnackBar(response.message);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingTransaction = false;
+        });
+        _showErrorSnackBar('Erro ao carregar transação: $e');
+      }
+    }
   }
 
   Future<void> _loadCategories() async {
@@ -74,6 +161,17 @@ class _CreateTransactionPageState extends State<CreateTransactionPage> {
           setState(() {
             _categories = response.categories;
             _isLoadingCategories = false;
+            
+            // Se a categoria atual não está na lista, tentar encontrá-la
+            if (_transaction != null && _selectedCategory == null && _categories.isNotEmpty) {
+              try {
+                _selectedCategory = _categories.firstWhere(
+                  (cat) => cat.id == _transaction!.category.id,
+                );
+              } catch (e) {
+                _selectedCategory = _categories.first;
+              }
+            }
           });
         } else {
           setState(() {
@@ -105,6 +203,17 @@ class _CreateTransactionPageState extends State<CreateTransactionPage> {
           setState(() {
             _bankAccounts = result['data'] as List<bank_account_models.BankAccountWithIcon>;
             _isLoadingAccounts = false;
+            
+            // Se a conta atual não está na lista, tentar encontrá-la
+            if (_transaction != null && _selectedBankAccount == null && _bankAccounts.isNotEmpty) {
+              try {
+                _selectedBankAccount = _bankAccounts.firstWhere(
+                  (acc) => acc.id == _transaction!.bankAccount.id,
+                );
+              } catch (e) {
+                _selectedBankAccount = _bankAccounts.first;
+              }
+            }
           });
         } else {
           setState(() {
@@ -409,7 +518,7 @@ class _CreateTransactionPageState extends State<CreateTransactionPage> {
     }
   }
 
-  Future<void> _handleCreateTransaction() async {
+  Future<void> _handleEditTransaction() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -438,7 +547,8 @@ class _CreateTransactionPageState extends State<CreateTransactionPage> {
       // Converter 'income' para 'revenue' para a API
       final apiType = _transactionType == 'income' ? 'revenue' : _transactionType;
       
-      final response = await _transactionService.createTransaction(
+      final response = await _transactionService.editTransaction(
+        transactionId: widget.transactionId,
         value: value,
         categoryId: _selectedCategory!.id,
         bankAccountId: _selectedBankAccount!.id,
@@ -459,7 +569,7 @@ class _CreateTransactionPageState extends State<CreateTransactionPage> {
       }
     } catch (e) {
       if (!mounted) return;
-      _showErrorSnackBar('Erro ao criar transação: $e');
+      _showErrorSnackBar('Erro ao editar transação: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -509,7 +619,7 @@ class _CreateTransactionPageState extends State<CreateTransactionPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Nova Transação',
+          'Editar Transação',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -518,74 +628,80 @@ class _CreateTransactionPageState extends State<CreateTransactionPage> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            // Header verde com valor e tabs
-            _buildHeaderSection(),
-            // Conteúdo
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Descrição
-                    _buildSectionTitle('Descrição'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _descriptionController,
-                      maxLines: 3,
-                      decoration: InputDecoration(
-                        labelText: 'Adicione uma descrição',
-                        prefixIcon: const Icon(Icons.description_outlined),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF08BF62),
-                            width: 2,
+      body: _isLoadingTransaction
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF08BF62),
+              ),
+            )
+          : Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  // Header verde com valor e tabs
+                  _buildHeaderSection(),
+                  // Conteúdo
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Descrição
+                          _buildSectionTitle('Descrição'),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _descriptionController,
+                            maxLines: 3,
+                            decoration: InputDecoration(
+                              labelText: 'Adicione uma descrição',
+                              prefixIcon: const Icon(Icons.description_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: Colors.grey[300]!),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFF08BF62),
+                                  width: 2,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 24),
+                          // Data
+                          _buildSectionTitle('Data'),
+                          const SizedBox(height: 8),
+                          _buildDateSelector(),
+                          const SizedBox(height: 24),
+                          // Categoria
+                          _buildSectionTitle('Categoria'),
+                          const SizedBox(height: 8),
+                          _buildCategorySelector(),
+                          const SizedBox(height: 24),
+                          // Conta ou cartão
+                          _buildSectionTitle('Conta ou cartão'),
+                          const SizedBox(height: 8),
+                          _buildBankAccountSelector(),
+                          const SizedBox(height: 32),
+                          // Botão Salvar
+                          PrimaryButton(
+                            text: 'Salvar',
+                            onPressed: _isLoading ? null : _handleEditTransaction,
+                            isLoading: _isLoading,
+                          ),
+                          const SizedBox(height: 16),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 24),
-                    // Data
-                    _buildSectionTitle('Data'),
-                    const SizedBox(height: 8),
-                    _buildDateSelector(),
-                    const SizedBox(height: 24),
-                    // Categoria
-                    _buildSectionTitle('Categoria'),
-                    const SizedBox(height: 8),
-                    _buildCategorySelector(),
-                    const SizedBox(height: 24),
-                    // Conta ou cartão
-                    _buildSectionTitle('Conta ou cartão'),
-                    const SizedBox(height: 8),
-                    _buildBankAccountSelector(),
-                    const SizedBox(height: 32),
-                    // Botão Adicionar
-                    PrimaryButton(
-                      text: 'Adicionar',
-                      onPressed: _isLoading ? null : _handleCreateTransaction,
-                      isLoading: _isLoading,
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -884,6 +1000,7 @@ class _CreateTransactionPageState extends State<CreateTransactionPage> {
 
 }
 
+// Reutilizando os widgets da CreateTransactionPage
 class _TransactionTypeTab extends StatelessWidget {
   final String label;
   final String value;
@@ -1133,6 +1250,7 @@ class _ValueSelectorBottomSheetState extends State<_ValueSelectorBottomSheet> {
     );
   }
 }
+
 class _DateButton extends StatelessWidget {
   final String label;
   final bool isSelected;
@@ -1190,5 +1308,4 @@ class _DateButton extends StatelessWidget {
     );
   }
 }
-
 
